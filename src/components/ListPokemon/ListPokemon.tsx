@@ -168,7 +168,7 @@ export default function ListPokemon() {
                     columnWrapperStyle={styles.row}
                     contentContainerStyle={styles.listContent}
                     renderItem={({ item }) => (
-                        <Pressable style={styles.card} /*onPress={() => item.pokemon_id && router.push(`/pokemon/${item.pokemon_id}` as any)*/}>
+                        <Pressable style={styles.card} onPress={() => item.pokemon_id && router.push(`/pokemon/${item.pokemon_id}` as any)}>
                             {/* ID Badge */}
                             <View style={styles.idBadge}>
                                 <Text style={styles.idText}>{formatId(item.pokemon_id)}</Text>

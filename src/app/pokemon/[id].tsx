@@ -19,6 +19,7 @@ export default function PokemonDetail() {
             try {
                 setIsLoading(true);
                 setError(null);
+
                 const data = await Requests.fetchPokemonData(params.id);
 
                 if (data && data.pokemon_info) {
@@ -33,6 +34,10 @@ export default function PokemonDetail() {
                             type1,
                             type2,
                         },
+                        stats: data.pokemon_info.stats,
+                        height: data.pokemon_info.height,
+                        weight: data.pokemon_info.weight,
+                        abilities: data.pokemon_info.abilities,
                     });
                 } else {
                     setError("Não foi possível carregar os detalhes do Pokémon.");
