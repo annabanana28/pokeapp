@@ -1,9 +1,10 @@
 import ShowPokemon from "@/components/ShowPokemon/ShowPokemon";
 import Pokemon from "@/interface/Pokemon";
+import { alternarFavorito, ehFavorito } from "@/service/FavoritesStorage";
 import Requests from "@/service/PokemonsRequests";
 import { useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, StyleSheet, Text } from "react-native";
+import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function PokemonDetail() {
@@ -11,6 +12,9 @@ export default function PokemonDetail() {
     const [pokemon, setPokemon] = useState<Pokemon | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    
+    // Estado para controlar se o Pokémon atual é favorito
+    const [isFavorite, setIsFavorite] = useState<boolean>(false);
 
     useEffect(() => {
         if (!params.id) return;
@@ -39,6 +43,10 @@ export default function PokemonDetail() {
                         weight: data.pokemon_info.weight,
                         abilities: data.pokemon_info.abilities,
                     });
+
+                    // Verifica no armazenamento se este Pokémon já está nos favoritos
+                    const status = await ehFavorito(Number(data.pokemon_id));
+                    setIsFavorite(status);
                 } else {
                     setError("Não foi possível carregar os detalhes do Pokémon.");
                 }
@@ -52,6 +60,13 @@ export default function PokemonDetail() {
 
         loadPokemonData();
     }, [params.id]);
+
+    // Função para alternar o status do favorito
+    const handleToggleFavorite = async () => {
+        if (!pokemon) return;
+        const novoStatus = await alternarFavorito(Number(pokemon.pokemon_id));
+        setIsFavorite(novoStatus);
+    };
 
     if (isLoading) {
         return (
@@ -72,6 +87,18 @@ export default function PokemonDetail() {
 
     return (
         <SafeAreaView style={styles.container}>
+            {/* Botão de Favoritar (Desafio 3) */}
+            <View style={styles.favoriteBar}>
+                <TouchableOpacity
+                    style={[styles.favoriteButton, isFavorite ? styles.favorited : styles.notFavorited]}
+                    onPress={handleToggleFavorite}
+                >
+                    <Text style={[styles.favoriteButtonText, isFavorite ? styles.textFavorited : styles.textNotFavorited]}>
+                        {isFavorite ? "❤️ Favoritado" : "🤍 Favoritar"}
+                    </Text>
+                </TouchableOpacity>
+            </View>
+
             <ShowPokemon pokemon={pokemon} />
         </SafeAreaView>
     );
@@ -100,5 +127,34 @@ const styles = StyleSheet.create({
         color: "#E53E3E",
         fontWeight: "500",
         textAlign: "center",
+    },
+    favoriteBar: {
+        alignItems: "flex-end",
+        paddingHorizontal: 20,
+        paddingTop: 10,
+    },
+    favoriteButton: {
+        paddingVertical: 8,
+        paddingHorizontal: 16,
+        borderRadius: 20,
+        borderWidth: 1,
+    },
+    favorited: {
+        backgroundColor: "#FFE5E5",
+        borderColor: "#FF3E3E",
+    },
+    notFavorited: {
+        backgroundColor: "#FFFFFF",
+        borderColor: "#CBD5E0",
+    },
+    favoriteButtonText: {
+        fontSize: 14,
+        fontWeight: "bold",
+    },
+    textFavorited: {
+        color: "#E53E3E",
+    },
+    textNotFavorited: {
+        color: "#4A5568",
     },
 });
